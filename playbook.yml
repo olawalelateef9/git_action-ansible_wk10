@@ -1,0 +1,42 @@
+---
+# PLAY 1: NGINX CONFIGURATION
+- name: Nginx Install
+  hosts: web
+  become: true
+  tasks:
+    - name: Install Nginx (Amazon Linux compatibility)
+      shell: |
+        amazon-linux-extras install nginx1 -y || yum install nginx -y
+      register: result
+      changed_when: "'Installing' in result.stdout"
+
+    - name: Start and Enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+# PLAY 2: JAVA APP CONFIGURATION
+- name: Java Application Install
+  hosts: app
+  become: true
+  tasks:
+    - name: Install Java 17 (Amazon Corretto)
+      yum:
+        name: java-17-amazon-corretto-devel
+        state: present
+
+    - name: Ensure App Directory Exists
+      file:
+        path: /opt/myapp
+        state: directory
+        mode: '0755'
+        owner: ec2-user
+
+  
+
+    - name: Start Java Application
+      shell: "nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 &"
+      async: 10
+      poll: 0
+      changed_when: false
