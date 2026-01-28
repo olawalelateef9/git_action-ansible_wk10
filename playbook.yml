@@ -30,6 +30,29 @@
         name: java-17-amazon-corretto-devel
         state: present
 
+    - name: Install Maven
+      yum:
+        name: maven
+        state: present    
+
+    - name: Verify Java Installation
+      shell: java -version
+      register: java_version
+      changed_when: false
+
+    - name: Show Installed Java Version
+      debug:
+        msg: "{{ java_version.stdout }}"
+
+    - name: Verify Maven Installation
+      shell: mvn -version
+      register: maven_version
+      changed_when: false
+
+    - name: Show Installed Maven Version
+      debug:
+        msg: "{{ maven_version.stdout }}"          
+
     - name: Ensure App Directory Exists
       file:
         path: /opt/myapp
