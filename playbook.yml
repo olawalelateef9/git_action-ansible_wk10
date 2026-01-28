@@ -1,5 +1,5 @@
 ---
-# PLAY 1: NGINX CONFIGURATION
+# PLAY 1: Web Node (Nginx)
 - name: Nginx Install
   hosts: web
   become: true
@@ -16,27 +16,31 @@
         state: started
         enabled: true
 
-# PLAY 2: JAVA APP CONFIGURATION
-- name: Java Application Install
+# PLAY 2: App Node (Java)
+- name: Java App Install and Run
   hosts: app
   become: true
+  gather_facts: true
+
   tasks:
     - name: Install Java 17 (Amazon Corretto)
       yum:
         name: java-17-amazon-corretto-devel
         state: present
 
-    - name: Ensure App Directory Exists
-      file:
-        path: /opt/myapp
-        state: directory
-        mode: '0755'
-        owner: ec2-user
+    - name: Install Maven
+      yum:
+        name: maven
+        state: present
 
-  
-
+    - name: Verify Java Installation
+      command: java -version
+      register: java_version
+      changed_when: false
+        
+    # Note: Replace 'my-app.jar' with your actual jar file name if you have one
     - name: Start Java Application
-      shell: "nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 &"
+      shell: "nohup java -version > /opt/myapp/java_test.log 2>&1 &"
       async: 10
       poll: 0
       changed_when: false

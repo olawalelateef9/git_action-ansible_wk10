@@ -45,4 +45,12 @@ resource "aws_instance" "java-node" {
   }
 }
 
+output "nginx_public_ip" {
+  value = aws_instance.nginx-node.public_ip
+}
+
+output "java_public_ip" {
+  value = aws_instance.java-node.public_ip
+}
+
 
